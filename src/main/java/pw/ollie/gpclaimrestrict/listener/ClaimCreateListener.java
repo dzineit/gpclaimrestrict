@@ -61,7 +61,7 @@ public final class ClaimCreateListener implements Listener {
             if (!Objects.equals(vertex1.getWorld(), claimMin.getWorld())) {
                 continue;
             }
-            if (trustManager.isTrustedNearby(existingClaim.ownerID, claimerId)) {
+            if (Objects.equals(claimerId, existingClaim.ownerID) || trustManager.isTrustedNearby(existingClaim.ownerID, claimerId)) {
                 continue;
             }
 
