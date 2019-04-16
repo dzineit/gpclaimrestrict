@@ -22,6 +22,21 @@ public final class TrustnearCommand implements CommandExecutor {
             return true;
         }
 
+        if (args.length < 1) {
+            sender.sendMessage(ChatColor.RED + "Please specify the name of the player to trust.");
+            return true;
+        }
+
+        String playerName = args[0];
+        Player player = plugin.getServer().getPlayer(playerName);
+        if (player == null) {
+            sender.sendMessage(ChatColor.RED + "That player is not online.");
+            return true;
+        }
+
+        Player truster = (Player) sender;
+        plugin.getTrustManager().trustNearby(truster.getUniqueId(), player.getUniqueId());
+        sender.sendMessage(ChatColor.GRAY + player.getName() + " can now build near your claims.");
         return true;
     }
 }
