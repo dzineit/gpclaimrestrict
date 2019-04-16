@@ -2,6 +2,8 @@ name: GriefPreventionClaimRestrict
 version: 1.0
 main: pw.ollie.gpclaimrestrict.GPCRPlugin
 
+depend: [GriefPrevention]
+
 permissions:
   gpcr.bypass:
     description: Bypass claim restrictions
