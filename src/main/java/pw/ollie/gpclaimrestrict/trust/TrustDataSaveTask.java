@@ -1,4 +1,4 @@
-package pw.ollie.gpclaimrestrict.trusted;
+package pw.ollie.gpclaimrestrict.trust;
 
 import pw.ollie.gpclaimrestrict.GPCRPlugin;
 

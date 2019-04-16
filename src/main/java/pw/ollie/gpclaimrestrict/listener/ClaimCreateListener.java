@@ -5,6 +5,7 @@ import me.ryanhamshire.GriefPrevention.GriefPrevention;
 import me.ryanhamshire.GriefPrevention.events.ClaimCreatedEvent;
 
 import pw.ollie.gpclaimrestrict.GPCRPlugin;
+import pw.ollie.gpclaimrestrict.trust.TrustManager;
 import pw.ollie.gpclaimrestrict.util.Cuboid;
 import pw.ollie.gpclaimrestrict.util.MathUtil;
 import pw.ollie.gpclaimrestrict.util.Vector3i;
@@ -12,12 +13,14 @@ import pw.ollie.gpclaimrestrict.util.Vector3i;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 
 import java.util.Collection;
 import java.util.Objects;
+import java.util.UUID;
 
 public final class ClaimCreateListener implements Listener {
     private final GPCRPlugin plugin;
@@ -32,7 +35,7 @@ public final class ClaimCreateListener implements Listener {
             return;
         }
         CommandSender creator = event.getCreator();
-        if (creator.hasPermission("gpcr.bypass")) {
+        if (!(creator instanceof Player) || creator.hasPermission("gpcr.bypass")) {
             return;
         }
 
@@ -50,10 +53,15 @@ public final class ClaimCreateListener implements Listener {
 
         // now we must check whether any existing claims fall into this area - in which case we cancel the event
         Collection<Claim> claims = GriefPrevention.instance.dataStore.getClaims();
+        TrustManager trustManager = plugin.getTrustManager();
+        UUID claimerId = ((Player) creator).getUniqueId();
 
         for (Claim existingClaim : claims) {
             Location vertex1 = existingClaim.getGreaterBoundaryCorner();
             if (!Objects.equals(vertex1.getWorld(), claimMin.getWorld())) {
+                continue;
+            }
+            if (trustManager.isTrustedNearby(existingClaim.ownerID, claimerId)) {
                 continue;
             }
 
@@ -63,16 +71,16 @@ public final class ClaimCreateListener implements Listener {
             int ySize = vertex1.getBlockY() - vertex2.getBlockY();
             int zSize = vertex1.getBlockZ() - vertex2.getBlockZ();
 
-            Location vertex3 = vertex1.add(xSize, ySize, 0);
+            Location vertex3 = vertex1.add(xSize, 0, 0);
             Location vertex4 = vertex1.add(xSize, 0, zSize);
-            Location vertex5 = vertex1.add(0, ySize, zSize);
-            Location vertex6 = vertex1.add(0, 0, zSize);
-            Location vertex7 = vertex1.add(0, ySize, 0);
-            Location vertex8 = vertex1.add(xSize, 0, 0);
+            Location vertex5 = vertex1.add(xSize, ySize, 0);
+            Location vertex6 = vertex1.add(0, ySize, 0);
+            Location vertex7 = vertex1.add(0, ySize, zSize);
+            Location vertex8 = vertex1.add(0, 0, zSize);
 
             if (MathUtil.containsAny(restrictionArea, vertex1, vertex2, vertex3, vertex4, vertex5, vertex6, vertex7, vertex8)) {
-                // todo check if the existing claim owner trusts the claimer
                 creator.sendMessage(ChatColor.RED + "You are too close to somebody else's claim!");
+                creator.sendMessage(ChatColor.RED + "If you know the person, you can ask them to trust you to build nearby with /trustnear.");
                 event.setCancelled(true);
                 return;
             }
