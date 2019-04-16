@@ -35,7 +35,7 @@ public final class Vector3i {
     }
 
     public Vector3i subtract(Vector3i v) {
-        return add(v.negate());
+        return new Vector3i(x - v.x, y - v.y, z - v.z);
     }
 
     public Vector3i negate() {
